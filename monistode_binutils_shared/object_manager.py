@@ -306,5 +306,5 @@ class ObjectManager:
         """
         return (
             f"  Name: {section.name}\n"
-            f"  Size: {len(section)} bytes ({section.physical_size} bytes of disk)\n"
+            f"  Size: {len(section)} entries ({section.physical_size} bytes of disk)\n"
         )
