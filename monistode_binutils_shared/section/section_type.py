@@ -8,3 +8,4 @@ class SectionType(enum.Enum):
     DATA = 1
     BSS = 2
     SYMBOL_TABLE = 3
+    RELOCATION_TABLE = 4

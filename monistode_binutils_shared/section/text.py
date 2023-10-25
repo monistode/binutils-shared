@@ -68,7 +68,15 @@ class Text:
             Symbol(Location(self.name, len(self) if address is None else address), name)
         )
 
-    def add_relocation(
+    def add_relocation(self, relocation: SymbolRelocation) -> None:
+        """Add a relocation to the section.
+
+        Args:
+            relocation (SymbolRelocation): The relocation to add.
+        """
+        self._relocations.append(relocation)
+
+    def add_raw_relocation(
         self,
         params: SymbolRelocationParams,
     ) -> None:

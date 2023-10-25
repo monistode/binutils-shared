@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 import struct
 
+from monistode_binutils_shared.section.relocation_table import RelocationTable
 from monistode_binutils_shared.section.symbol_table import SymbolTable
 from monistode_binutils_shared.section.text import Text
 
@@ -179,6 +180,7 @@ class ObjectManager:
         sections_data: list[bytes] = []
         sections_table: list[SectionTableEntry] = []
         symbol_table = SymbolTable()
+        relocation_table = RelocationTable()
         for section in self._sections:
             if isinstance(section, SymbolTable):
                 continue
@@ -191,11 +193,20 @@ class ObjectManager:
             )
             for symbol in section.symbols:
                 symbol_table.append(symbol)
+            for relocation in section.relocations:
+                relocation_table.append(relocation)
         sections_data.append(symbol_table.data)
         sections_table.append(
             SectionTableEntry(
                 SectionType.SYMBOL_TABLE.value,
                 len(symbol_table),
+            ),
+        )
+        sections_data.append(relocation_table.data)
+        sections_table.append(
+            SectionTableEntry(
+                SectionType.RELOCATION_TABLE.value,
+                len(relocation_table),
             ),
         )
         return (
@@ -231,12 +242,19 @@ class ObjectManager:
             section_offset += section.physical_size
 
         self._apply_symbol_tables()
+        self._apply_relocation_tables()
 
     def _apply_symbol_tables(self) -> None:
         """Apply the symbol tables to the sections."""
         for section in self._sections:
             if isinstance(section, SymbolTable):
                 self._apply_symbol_table(section)
+
+    def _apply_relocation_tables(self) -> None:
+        """Apply the relocation tables to the sections."""
+        for section in self._sections:
+            if isinstance(section, RelocationTable):
+                self._apply_relocation_table(section)
 
     def _apply_symbol_table(self, table: SymbolTable) -> None:
         """Apply a symbol table to the sections.
@@ -246,6 +264,15 @@ class ObjectManager:
         """
         for section in self._sections:
             self._apply_symbol_table_to_section(table, section)
+
+    def _apply_relocation_table(self, table: RelocationTable) -> None:
+        """Apply a relocation table to the sections.
+
+        Args:
+            table (RelocationTable): The relocation table to apply.
+        """
+        for section in self._sections:
+            self._apply_relocation_table_to_section(table, section)
 
     def _apply_symbol_table_to_section(
         self,
@@ -262,6 +289,21 @@ class ObjectManager:
             if symbol.location.section == section.name:
                 section.add_symbol(symbol)
 
+    def _apply_relocation_table_to_section(
+        self,
+        table: RelocationTable,
+        section: Section,
+    ) -> None:
+        """Apply a relocation table to a section.
+
+        Args:
+            table (RelocationTable): The relocation table to apply.
+            section (Section): The section to apply the relocation table to.
+        """
+        for relocation in table:
+            if relocation.location.section == section.name:
+                section.add_relocation(relocation)
+
     def _section_from_bytes(self, section_type: int, data: bytes, size: int) -> Section:
         if section_type == SectionType.TEXT.value:
             text_section = Text(self._parameters.text_byte)
@@ -271,6 +313,10 @@ class ObjectManager:
             symtab_section = SymbolTable()
             symtab_section.from_bytes(data, size)
             return symtab_section
+        if section_type == SectionType.RELOCATION_TABLE.value:
+            reltab_section = RelocationTable()
+            reltab_section.from_bytes(data, size)
+            return reltab_section
         raise ValueError(f"Unknown section type: {section_type}")
 
     def append_section(self, section: Section) -> None:
