@@ -358,3 +358,12 @@ class ObjectManager:
                 existing_section.merge(section)
                 return
         self._sections.append(section)
+
+    def merge(self, other: "ObjectManager") -> None:
+        """Merge another object file into this one.
+
+        Args:
+            other (ObjectFile): The other object file.
+        """
+        for section in other._sections:
+            self.append_section(section)
