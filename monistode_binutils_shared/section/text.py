@@ -112,3 +112,48 @@ class Text:
     def __iter__(self) -> Iterator[int]:
         """Iterate over the bytes in the section."""
         return iter(self._data)
+
+    def merge(self, other: "Text") -> None:
+        """Merge another section into this one.
+
+        Args:
+            other (Text): The other section to merge.
+        """
+        for byte in other:
+            self._data.append(byte)
+        self._symbols.extend(self.offset_symbols(other.symbols, len(self)))
+        self._relocations.extend(self.offset_relocations(other.relocations, len(self)))
+
+    def offset_symbols(self, symbols: list[Symbol], offset: int) -> list[Symbol]:
+        """Offset the symbols in the section.
+
+        Args:
+            symbols (list[Symbol]): The symbols to offset.
+            offset (int): The offset to apply to the symbols.
+        """
+        return [
+            Symbol(
+                symbol.location.apply_offset(offset),
+                symbol.name,
+            )
+            for symbol in symbols
+        ]
+
+    def offset_relocations(
+        self, relocations: list[SymbolRelocation], offset: int
+    ) -> list[SymbolRelocation]:
+        """Offset the relocations in the section.
+
+        Args:
+            relocations (list[SymbolRelocation]): The relocations to offset.
+            offset (int): The offset to apply to the relocations.
+        """
+        return [
+            SymbolRelocation(
+                relocation.location.apply_offset(offset),
+                relocation.symbol,
+                relocation.offset,
+                relocation.relative,
+            )
+            for relocation in relocations
+        ]

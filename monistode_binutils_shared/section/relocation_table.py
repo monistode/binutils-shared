@@ -172,3 +172,11 @@ class RelocationTable:
             relocation (SymbolRelocation): The relocation to add.
         """
         raise NotImplementedError
+
+    def merge(self, other: "RelocationTable") -> None:
+        """Merge another relocation table into this one.
+
+        Args:
+            other (RelocationTable): The other relocation table.
+        """
+        raise NotImplementedError

@@ -119,6 +119,8 @@ class SymbolTable:
         Args:
             symbol (Symbol): The symbol to append.
         """
+        if symbol.name in self.names:
+            raise ValueError(f"Symbol {symbol.name} already exists in symbol table.")
         self._symbols.append(symbol)
         self.append_name(symbol.name)
 
@@ -156,5 +158,13 @@ class SymbolTable:
 
         Args:
             relocation (SymbolRelocation): The relocation to add.
+        """
+        raise NotImplementedError
+
+    def merge(self, other: "SymbolTable") -> None:
+        """Merge another symbol table into this one.
+
+        Args:
+            other (SymbolTable): The other symbol table.
         """
         raise NotImplementedError

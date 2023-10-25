@@ -319,14 +319,6 @@ class ObjectManager:
             return reltab_section
         raise ValueError(f"Unknown section type: {section_type}")
 
-    def append_section(self, section: Section) -> None:
-        """Append a section to the object file.
-
-        Args:
-            section (Section): The section to append.
-        """
-        self._sections.append(section)
-
     def summary(self) -> str:
         """Generate a human-readable summary of the object file.
 
@@ -354,3 +346,15 @@ class ObjectManager:
             f"  Name: {section.name}\n"
             f"  Size: {len(section)} entries ({section.physical_size} bytes of disk)\n"
         )
+
+    def append_section(self, section: Section) -> None:
+        """Append a section to the object file.
+
+        Args:
+            section (Section): The section to append.
+        """
+        for existing_section in self._sections:
+            if section.name == existing_section.name:
+                existing_section.merge(section)
+                return
+        self._sections.append(section)

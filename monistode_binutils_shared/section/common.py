@@ -40,3 +40,6 @@ class Section(Protocol):
 
     def add_relocation(self, relocation: SymbolRelocation) -> None:
         """Add a relocation to the section."""
+
+    def merge(self, other: "Section") -> None:
+        """Merge another section into this one."""
