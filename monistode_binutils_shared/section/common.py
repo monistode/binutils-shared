@@ -11,11 +11,21 @@ class Section(Protocol):
     name: str
 
     def __len__(self) -> int:
-        """The size of the section in bytes."""
+        """The size of the section in bytes.
+        Will only be used for relocations when merging sections;
+        should represent the expected size of the section after
+        loading into memory.
+        """
+
+    @property
+    def physical_size(self) -> int:
+        """The size of the section as it appears on disk."""
 
     @property
     def data(self) -> bytes:
-        """The data contained in the section."""
+        """The data contained in the section, in a format that
+        can be written to a file.
+        """
 
     @property
     def symbols(self) -> list[Symbol]:
@@ -24,3 +34,9 @@ class Section(Protocol):
     @property
     def relocations(self) -> list[SymbolRelocation]:
         """A list of relocations in the section."""
+
+    def add_symbol(self, symbol: Symbol) -> None:
+        """Add a symbol to the section."""
+
+    def add_relocation(self, relocation: SymbolRelocation) -> None:
+        """Add a relocation to the section."""

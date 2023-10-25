@@ -17,7 +17,7 @@ class Text:
         """Initialize the text section.
 
         Args:
-            byte (int): The byte to start at.
+            byte (int): The length of a byte in bits.
             address_bits (int): The number of bits in an address.
         """
         self._byte = byte
@@ -27,12 +27,17 @@ class Text:
 
     @property
     def byte(self) -> int:
-        """The byte to start at."""
+        """The length of a byte in bits."""
         return self._byte
 
     def __len__(self) -> int:
         """The size of the section in bytes."""
         return len(self._data)
+
+    @property
+    def physical_size(self) -> int:
+        """The size of the section as it appears on disk."""
+        return len(self.data)
 
     @property
     def data(self) -> bytes:
@@ -49,7 +54,10 @@ class Text:
         """A list of relocations in the section."""
         return self._relocations
 
-    def add_symbol(self, name: str, address: int | None = None) -> None:
+    def add_symbol(self, symbol: Symbol) -> None:
+        self._symbols.append(symbol)
+
+    def add_raw_symbol(self, name: str, address: int | None = None) -> None:
         """Add a symbol to the section at the address or the current byte.
 
         Args:

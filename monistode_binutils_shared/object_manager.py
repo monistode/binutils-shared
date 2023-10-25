@@ -1,18 +1,11 @@
 """A manager for object files"""
 from dataclasses import dataclass
-import enum
 import struct
 
+from monistode_binutils_shared.section.symbol_table import SymbolTable
 from monistode_binutils_shared.section.text import Text
 
-from .section import Section
-
-
-class SectionType(enum.Enum):
-    """The type of section."""
-
-    TEXT = 0
-    DATA = 1
+from .section import Section, SectionType
 
 
 @dataclass
@@ -185,7 +178,10 @@ class ObjectManager:
         """
         sections_data: list[bytes] = []
         sections_table: list[SectionTableEntry] = []
+        symbol_table = SymbolTable()
         for section in self._sections:
+            if isinstance(section, SymbolTable):
+                continue
             sections_data.append(section.data)
             sections_table.append(
                 SectionTableEntry(
@@ -193,10 +189,19 @@ class ObjectManager:
                     len(section),
                 ),
             )
+            for symbol in section.symbols:
+                symbol_table.append(symbol)
+        sections_data.append(symbol_table.data)
+        sections_table.append(
+            SectionTableEntry(
+                SectionType.SYMBOL_TABLE.value,
+                len(symbol_table),
+            ),
+        )
         return (
             ObjectHeader(
                 self._parameters,
-                len(self._sections),
+                len(sections_table),
             ).to_bytes()
             + b"".join(entry.to_bytes() for entry in sections_table)
             + b"".join(sections_data)
@@ -214,6 +219,7 @@ class ObjectManager:
         for _ in range(header.section_table_size):
             section_entry = SectionTableEntry.from_bytes(self._data[table_offset:])
             table_offset += section_entry.size()
+
             section = self._section_from_bytes(
                 section_entry.section_type,
                 self._data[section_offset:],
@@ -222,25 +228,50 @@ class ObjectManager:
             self._sections.append(
                 section,
             )
-            section_offset += len(section)
+            section_offset += section.physical_size
+
+        self._apply_symbol_tables()
+
+    def _apply_symbol_tables(self) -> None:
+        """Apply the symbol tables to the sections."""
+        for section in self._sections:
+            if isinstance(section, SymbolTable):
+                self._apply_symbol_table(section)
+
+    def _apply_symbol_table(self, table: SymbolTable) -> None:
+        """Apply a symbol table to the sections.
+
+        Args:
+            table (SymbolTable): The symbol table to apply.
+        """
+        for section in self._sections:
+            self._apply_symbol_table_to_section(table, section)
+
+    def _apply_symbol_table_to_section(
+        self,
+        table: SymbolTable,
+        section: Section,
+    ) -> None:
+        """Apply a symbol table to a section.
+
+        Args:
+            table (SymbolTable): The symbol table to apply.
+            section (Section): The section to apply the symbol table to.
+        """
+        for symbol in table:
+            if symbol.location.section == section.name:
+                section.add_symbol(symbol)
 
     def _section_from_bytes(self, section_type: int, data: bytes, size: int) -> Section:
         if section_type == SectionType.TEXT.value:
             text_section = Text(self._parameters.text_byte)
             text_section.from_bytes(data, size)
             return text_section
+        if section_type == SectionType.SYMBOL_TABLE.value:
+            symtab_section = SymbolTable()
+            symtab_section.from_bytes(data, size)
+            return symtab_section
         raise ValueError(f"Unknown section type: {section_type}")
-
-    def string_at(self, address: int) -> str:
-        """Get the null-terminated string at the address.
-
-        Args:
-            address (int): The address of the string.
-
-        Returns:
-            str: The string.
-        """
-        return self._data[address : self._data.find(b"\x00", address)].decode("utf-8")
 
     def append_section(self, section: Section) -> None:
         """Append a section to the object file.
@@ -275,5 +306,5 @@ class ObjectManager:
         """
         return (
             f"  Name: {section.name}\n"
-            f"  Size: {len(section)} bytes ({len(section.data)} bytes of disk)\n"
+            f"  Size: {len(section)} bytes ({section.physical_size} bytes of disk)\n"
         )
