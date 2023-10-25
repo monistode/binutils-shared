@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "monistode-binutils-shared"
-version = "0.1.0"
+version = "0.1.1"
 description = "A collection of tools shared among the monistode binutils."
 authors = ["rizerphe <44440399+rizerphe@users.noreply.github.com>"]
 readme = "README.md"
@@ -8,6 +8,7 @@ packages = [{include = "monistode_binutils_shared"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+bitstruct = "^8.18.0"
 
 
 [build-system]
