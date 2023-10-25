@@ -1,4 +1,6 @@
 """The text section of the object file."""
+from typing import Iterator
+
 from monistode_binutils_shared.location import Location
 
 from ..bytearray import ByteArray
@@ -90,3 +92,7 @@ class Text:
             length (int): The number of bytes to add.
         """
         self._data.from_bytes(data, length)
+
+    def __iter__(self) -> Iterator[int]:
+        """Iterate over the bytes in the section."""
+        return iter(self._data)

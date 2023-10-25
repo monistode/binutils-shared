@@ -60,6 +60,21 @@ class Parameters:
         """
         return struct.calcsize("<IIIII")
 
+    def summary(self) -> str:
+        """Generate a human-readable summary of the object header.
+
+        Returns:
+            str: The summary.
+        """
+        return (
+            f"Parameters:\n"
+            f"  Opcode size: {self.opcode_size}\n"
+            f"  Text byte: {self.text_byte}\n"
+            f"  Data byte: {self.data_byte}\n"
+            f"  Text address: {self.text_address}\n"
+            f"  Data address: {self.data_address}\n"
+        )
+
 
 @dataclass
 class SectionTableEntry:
@@ -78,7 +93,7 @@ class SectionTableEntry:
         Returns:
             SectionTableEntry: The section table entry.
         """
-        return cls(*struct.unpack("<II", file[:12]))
+        return cls(*struct.unpack("<II", file[: cls.size()]))
 
     def to_bytes(self) -> bytes:
         """Convert the section table entry to a file.
@@ -115,9 +130,10 @@ class ObjectHeader:
         Returns:
             ObjectHeader: The object header.
         """
+        parameters = Parameters.from_bytes(file)
         return cls(
-            Parameters.from_bytes(file[:16]),
-            *struct.unpack("<I", file[16:24]),
+            parameters,
+            *struct.unpack("<I", file[parameters.size() : parameters.size() + 4]),
         )
 
     def to_bytes(self) -> bytes:
@@ -233,3 +249,31 @@ class ObjectManager:
             section (Section): The section to append.
         """
         self._sections.append(section)
+
+    def summary(self) -> str:
+        """Generate a human-readable summary of the object file.
+
+        Returns:
+            str: The summary.
+        """
+        return (
+            f"Object file:\n"
+            f"{self._parameters.summary()}"
+            f"Sections:\n"
+            + "\n".join(self.section_summary(section) for section in self._sections)
+        )
+
+    @staticmethod
+    def section_summary(section: Section) -> str:
+        """Generate a human-readable summary of a section.
+
+        Args:
+            section (Section): The section.
+
+        Returns:
+            str: The summary.
+        """
+        return (
+            f"  Name: {section.name}\n"
+            f"  Size: {len(section)} bytes ({len(section.data)} bytes of disk)\n"
+        )
