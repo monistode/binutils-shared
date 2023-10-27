@@ -2,9 +2,9 @@
 import struct
 from typing import Iterable
 
-from monistode_binutils_shared.location import Location
-
+from ..location import Location
 from ..relocation import RelocationTargetSymbol, SymbolRelocation
+from ..segment.common import Segment
 from ..symbol import Symbol
 from .section_type import SectionType
 
@@ -18,7 +18,7 @@ class RelocationTable:
         """Initialize the symbol table."""
         self._relocations: list[SymbolRelocation] = []
         self.names: dict[bytes, int] = {}
-        self._format = "<IIIIII"
+        self._format = "<IIIIIII"
 
     def from_bytes(self, data: bytes, symbol_count: int) -> None:
         """Load the symbol table from bytes.
@@ -35,6 +35,7 @@ class RelocationTable:
                 location_offset,
                 name_addr,
                 symbol_section_id,
+                symbol_size,
                 symbol_offset,
                 relative,
             ) = struct.unpack(self._format, relocation_data)
@@ -52,6 +53,7 @@ class RelocationTable:
                         relocation_name,
                         SectionType(symbol_section_id).name.lower(),
                     ),
+                    symbol_size,
                     symbol_offset,
                     relative,
                 )
@@ -102,6 +104,7 @@ class RelocationTable:
             relocation.location.offset,
             self.names[relocation.symbol.name.encode("utf-8")],
             self.section_name_to_id(relocation.symbol.section_name),
+            relocation.size,
             relocation.offset,
             relocation.relative,
         )
@@ -180,3 +183,11 @@ class RelocationTable:
             other (RelocationTable): The other relocation table.
         """
         raise NotImplementedError
+
+    def segments(self) -> tuple[Segment, ...]:
+        """Get the segments of the symbol table.
+
+        Returns:
+            list[bytes]: The segments.
+        """
+        return ()

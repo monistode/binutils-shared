@@ -1,6 +1,6 @@
 """A class representing a bytearray of any esoteric byte size."""
 
-from typing import Iterable
+from typing import Iterable, Iterator
 
 import bitstruct
 
@@ -53,7 +53,7 @@ class ByteArray:
         """
         return self._length
 
-    def __iter__(self) -> Iterable[int]:
+    def __iter__(self) -> Iterator[int]:
         """Get an iterator for the bytearray.
 
         Returns:

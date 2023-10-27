@@ -1,6 +1,7 @@
 """A manager for object files"""
 from dataclasses import dataclass
 import struct
+from typing import Iterator
 
 from monistode_binutils_shared.section.relocation_table import RelocationTable
 from monistode_binutils_shared.section.symbol_table import SymbolTable
@@ -367,3 +368,11 @@ class ObjectManager:
         """
         for section in other._sections:
             self.append_section(section)
+
+    def __iter__(self) -> Iterator[Section]:
+        """Iterate over the sections.
+
+        Yields:
+            Iterator[Section]: The sections.
+        """
+        return iter(self._sections)

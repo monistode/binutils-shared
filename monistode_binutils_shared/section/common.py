@@ -2,6 +2,7 @@
 from typing import Protocol
 
 from ..relocation import SymbolRelocation
+from ..segment import Segment
 from ..symbol import Symbol
 
 
@@ -43,3 +44,6 @@ class Section(Protocol):
 
     def merge(self, other: "Section") -> None:
         """Merge another section into this one."""
+
+    def segments(self) -> tuple[Segment, ...]:
+        """Convert the section into a list of segments."""

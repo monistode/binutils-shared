@@ -2,9 +2,11 @@
 from typing import Iterator
 
 from monistode_binutils_shared.location import Location
+from monistode_binutils_shared.section.common import Segment
 
 from ..bytearray import ByteArray
 from ..relocation import SymbolRelocation, SymbolRelocationParams
+from ..segment.text import TextSegment
 from ..symbol import Symbol
 
 
@@ -157,3 +159,7 @@ class Text:
             )
             for relocation in relocations
         ]
+
+    def segments(self) -> tuple[Segment]:
+        """Get the segments in the section."""
+        return (TextSegment(self),)

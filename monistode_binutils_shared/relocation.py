@@ -17,11 +17,11 @@ class SymbolRelocationParams:
     """Parameters for a symbol relocation.
 
     Adds to the bits at location with the address of target.
-    (the offset here is the number of bits to add to the location,
-    as the location is a byte address)
+    The size is in bits, same with the offset.
     """
 
     target: RelocationTargetSymbol
+    size: int
     offset: int
     relative: bool
 
@@ -32,6 +32,7 @@ class SymbolRelocation:
 
     location: Location
     symbol: RelocationTargetSymbol
+    size: int
     offset: int
     relative: bool
 
@@ -51,6 +52,7 @@ class SymbolRelocation:
         return cls(
             location,
             params.target,
+            params.size,
             params.offset,
             params.relative,
         )

@@ -2,9 +2,9 @@
 import struct
 from typing import Iterable
 
-from monistode_binutils_shared.location import Location
-
+from ..location import Location
 from ..relocation import SymbolRelocation
+from ..segment.common import Segment
 from ..symbol import Symbol
 from .section_type import SectionType
 
@@ -168,3 +168,11 @@ class SymbolTable:
             other (SymbolTable): The other symbol table.
         """
         raise NotImplementedError
+
+    def segments(self) -> tuple[Segment, ...]:
+        """Get the segments of the symbol table.
+
+        Returns:
+            list[bytes]: The segments.
+        """
+        return ()
