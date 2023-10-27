@@ -1,5 +1,5 @@
 """A class representing a single section in the object file."""
-from typing import Protocol
+from typing import Protocol, Self
 
 from ..relocation import SymbolRelocation
 from ..segment import Segment
@@ -42,7 +42,7 @@ class Section(Protocol):
     def add_relocation(self, relocation: SymbolRelocation) -> None:
         """Add a relocation to the section."""
 
-    def merge(self, other: "Section") -> None:
+    def merge(self, other: Self) -> None:
         """Merge another section into this one."""
 
     def segments(self) -> tuple[Segment, ...]:
