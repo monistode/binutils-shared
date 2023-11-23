@@ -1,4 +1,4 @@
-"""The text section of the object file."""
+"""The data section of the object file."""
 from typing import Iterator
 
 from monistode_binutils_shared.location import Location
@@ -6,17 +6,17 @@ from monistode_binutils_shared.section.common import Segment
 
 from ..bytearray import ByteArray
 from ..relocation import SymbolRelocation, SymbolRelocationParams
-from ..segment.text import TextSegment
+from ..segment.data import DataSegment
 from ..symbol import Symbol
 
 
-class Text:
-    """The text section of the object file."""
+class Data:
+    """The data section of the object file."""
 
-    name = "text"
+    name = "data"
 
     def __init__(self, byte: int) -> None:
-        """Initialize the text section.
+        """Initialize the data section.
 
         Args:
             byte (int): The length of a byte in bits.
@@ -115,11 +115,11 @@ class Text:
         """Iterate over the bytes in the section."""
         return iter(self._data)
 
-    def merge(self, other: "Text") -> None:
+    def merge(self, other: "Data") -> None:
         """Merge another section into this one.
 
         Args:
-            other (Text): The other section to merge.
+            other (Data): The other section to merge.
         """
         for byte in other:
             self._data.append(byte)
@@ -163,4 +163,4 @@ class Text:
 
     def segments(self) -> tuple[Segment]:
         """Get the segments in the section."""
-        return (TextSegment(self),)
+        return (DataSegment(self),)

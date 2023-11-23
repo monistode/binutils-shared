@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import struct
 from typing import Iterator
 
+from monistode_binutils_shared.section.data import Data
 from monistode_binutils_shared.section.relocation_table import RelocationTable
 from monistode_binutils_shared.section.symbol_table import SymbolTable
 from monistode_binutils_shared.section.text import Text
@@ -310,6 +311,10 @@ class ObjectManager:
             text_section = Text(self._parameters.text_byte)
             text_section.from_bytes(data, size)
             return text_section
+        if section_type == SectionType.DATA.value:
+            data_section = Data(self._parameters.data_byte)
+            data_section.from_bytes(data, size)
+            return data_section
         if section_type == SectionType.SYMBOL_TABLE.value:
             symtab_section = SymbolTable()
             symtab_section.from_bytes(data, size)
