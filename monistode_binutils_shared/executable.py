@@ -243,9 +243,17 @@ class HarvardExecutableFilePair:
     @classmethod
     def from_folder(cls, folder: str) -> "HarvardExecutableFilePair":
         """Return an executable from a folder."""
-        text_file = open(os.path.join(folder, "text.bin"), "rb+")
+        text_file = (
+            open(os.path.join(folder, "text.bin"), "rb+")
+            if os.path.exists(os.path.join(folder, "text.bin"))
+            else open(os.path.join(folder, "text.bin"), "wb+")
+        )
         text = mmap.mmap(text_file.fileno(), 0)
-        data_file = open(os.path.join(folder, "data.bin"), "rb+")
+        data_file = (
+            open(os.path.join(folder, "data.bin"), "rb+")
+            if os.path.exists(os.path.join(folder, "data.bin"))
+            else open(os.path.join(folder, "data.bin"), "wb+")
+        )
         data = mmap.mmap(data_file.fileno(), 0)
         return cls(text=text, data=data)
 
