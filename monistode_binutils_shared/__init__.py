@@ -1,5 +1,11 @@
 from .bytearray import ByteArray
-from .executable import Executable, ExecutableFile, ExecutableHeader, PlacedBinary
+from .executable import (
+    Executable,
+    ExecutableFile,
+    ExecutableHeader,
+    HarvardExecutableFilePair,
+    PlacedBinary,
+)
 from .object_manager import ObjectManager, Parameters as ObjectParameters
 from .relocation import SymbolRelocation
 from .section import Section
@@ -18,5 +24,6 @@ __all__ = [
     "Executable",
     "ExecutableFile",
     "ExecutableHeader",
+    "HarvardExecutableFilePair",
     "PlacedBinary",
 ]
