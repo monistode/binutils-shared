@@ -267,8 +267,8 @@ class HarvardExecutableFilePair:
         """Clear the executable."""
         assert harvard
         assert entry_point == 0
-        self.text[0 : len(self.text)] = bytes()
-        self.data[0 : len(self.data)] = bytes()
+        self.text[0 : len(self.text)] = b"\0" * len(self.text)
+        self.data[0 : len(self.data)] = b"\0" * len(self.data)
 
     def append_segment(self, segment: PlacedBinary) -> None:
         if segment.flags.executable:
