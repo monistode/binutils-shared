@@ -2,6 +2,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 import mmap
+import os
 import struct
 from typing import Iterator, Protocol
 
@@ -230,6 +231,72 @@ class Executable(Protocol):
 
     def append_segment(self, segment: PlacedBinary) -> None:
         """Append a segment to the executable."""
+
+
+@dataclass
+class HarvardExecutableFilePair:
+    """A folder with yaml files that represent an executable"""
+
+    text: bytearray | mmap.mmap
+    data: bytearray | mmap.mmap
+
+    @classmethod
+    def from_folder(cls, folder: str) -> "HarvardExecutableFilePair":
+        """Return an executable from a folder."""
+        text_file = open(os.path.join(folder, "text.bin"), "rb+")
+        text = mmap.mmap(text_file.fileno(), 0)
+        data_file = open(os.path.join(folder, "data.bin"), "rb+")
+        data = mmap.mmap(data_file.fileno(), 0)
+        return cls(text=text, data=data)
+
+    def clear(
+        self,
+        harvard: bool,
+        entry_point: int,
+    ) -> None:
+        """Clear the executable."""
+        assert harvard
+        assert entry_point == 0
+        self.text[0 : len(self.text)] = bytes()
+        self.data[0 : len(self.data)] = bytes()
+
+    def append_segment(self, segment: PlacedBinary) -> None:
+        if segment.flags.executable:
+            self.append_text_segment(segment)
+        else:
+            self.append_data_segment(segment)
+
+    def append_text_segment(self, segment: PlacedBinary) -> None:
+        """Append a segment to the executable."""
+        if segment.data:
+            self.text_len_to_fit(segment.offset + segment.size)
+            self.text[segment.offset : segment.offset + segment.size] = bytes(
+                segment.data
+            )
+
+    def text_len_to_fit(self, size: int) -> None:
+        """Extend the text segment to fit the given size."""
+        if size > len(self.text):
+            if isinstance(self.text, mmap.mmap):
+                self.text.resize(size)
+            else:
+                self.text.extend(bytes(size - len(self.text)))
+
+    def append_data_segment(self, segment: PlacedBinary) -> None:
+        """Append a segment to the executable."""
+        if segment.data:
+            self.data_len_to_fit(segment.offset + segment.size)
+            self.data[segment.offset : segment.offset + segment.size] = bytes(
+                segment.data
+            )
+
+    def data_len_to_fit(self, size: int) -> None:
+        """Extend the data segment to fit the given size."""
+        if size > len(self.data):
+            if isinstance(self.data, mmap.mmap):
+                self.data.resize(size)
+            else:
+                self.data.extend(bytes(size - len(self.data)))
 
 
 @dataclass
