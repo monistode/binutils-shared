@@ -34,6 +34,10 @@ class PlacedBinary:
         """Return the binary as bytes."""
         return bytes(self.data)
 
+    def __iter__(self) -> Iterator[int]:
+        """Return an iterator over the binary."""
+        yield from self.data
+
     @classmethod
     def from_bytes(
         cls,
@@ -267,8 +271,8 @@ class HarvardExecutableFilePair:
         """Clear the executable."""
         assert harvard
         assert entry_point == 0
-        self.text[0 : len(self.text)] = b"\0" * len(self.text)
-        self.data[0 : len(self.data)] = b"\0" * len(self.data)
+        self.text[0 : len(self.text)] = bytes(len(self.text))
+        self.data[0 : len(self.data)] = bytes(len(self.data))
 
     def append_segment(self, segment: PlacedBinary) -> None:
         if segment.flags.executable:
@@ -281,7 +285,7 @@ class HarvardExecutableFilePair:
         if segment.data:
             self.text_len_to_fit(segment.offset + segment.size)
             self.text[segment.offset : segment.offset + segment.size] = bytes(
-                segment.data
+                list(segment.data)
             )
 
     def text_len_to_fit(self, size: int) -> None:
@@ -297,7 +301,7 @@ class HarvardExecutableFilePair:
         if segment.data:
             self.data_len_to_fit(segment.offset + segment.size)
             self.data[segment.offset : segment.offset + segment.size] = bytes(
-                segment.data
+                list(segment.data)
             )
 
     def data_len_to_fit(self, size: int) -> None:
