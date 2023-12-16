@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import struct
 from typing import Protocol
 
+from ..bytearray import ByteArray
 from ..relocation import SymbolRelocation
 from ..symbol import Symbol
 
@@ -13,21 +14,29 @@ class Flags:
     executable: bool
     writable: bool
     readable: bool
+    special: bool = False
+    stripped: bool = False
 
     def __bytes__(self) -> bytes:
         """Return the flags as a byte."""
         return struct.pack(
             "B",
-            (self.executable << 2) | (self.writable << 1) | self.readable,
+            (self.stripped << 4)
+            | (self.special << 3)
+            | (self.readable << 2)
+            | (self.writable << 1)
+            | self.executable,
         )
 
     @classmethod
     def from_bytes(cls, bytes_: bytes) -> "Flags":
         """Return the flags from a byte."""
         return cls(
-            executable=bool(bytes_[0] & 0b100),
-            writable=bool(bytes_[0] & 0b010),
-            readable=bool(bytes_[0] & 0b001),
+            executable=bool(bytes_[0] & 0b1),
+            writable=bool(bytes_[0] & 0b10),
+            readable=bool(bytes_[0] & 0b100),
+            special=bool(bytes_[0] & 0b1000),
+            stripped=bool(bytes_[0] & 0b10000),
         )
 
     def __len__(self) -> int:
@@ -38,7 +47,7 @@ class Flags:
 class Segment(Protocol):
     """A class representing a single segment in the executable."""
 
-    def data(self) -> bytes | None:
+    def data(self) -> ByteArray | None:
         """The data contained in the segment, or None if the
         segment should be zero-initialized.
         """

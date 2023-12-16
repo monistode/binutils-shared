@@ -275,6 +275,8 @@ class HarvardExecutableFilePair:
         self.data[0 : len(self.data)] = bytes(len(self.data))
 
     def append_segment(self, segment: PlacedBinary) -> None:
+        if segment.flags.special:
+            return
         if segment.flags.executable:
             self.append_text_segment(segment)
         else:
