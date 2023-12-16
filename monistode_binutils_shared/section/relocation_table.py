@@ -18,7 +18,7 @@ class RelocationTable:
         """Initialize the symbol table."""
         self._relocations: list[SymbolRelocation] = []
         self.names: dict[bytes, int] = {}
-        self._format = "<IIIIIII"
+        self._format = "<IIIIII"
 
     def from_bytes(self, data: bytes, symbol_count: int) -> None:
         """Load the symbol table from bytes.
@@ -34,7 +34,6 @@ class RelocationTable:
                 location_section_id,
                 location_offset,
                 name_addr,
-                symbol_section_id,
                 symbol_size,
                 symbol_offset,
                 relative,
@@ -51,7 +50,6 @@ class RelocationTable:
                     ),
                     RelocationTargetSymbol(
                         relocation_name,
-                        SectionType(symbol_section_id).name.lower(),
                     ),
                     symbol_size,
                     symbol_offset,
@@ -103,7 +101,6 @@ class RelocationTable:
             self.section_name_to_id(relocation.location.section),
             relocation.location.offset,
             self.names[relocation.symbol.name.encode("utf-8")],
-            self.section_name_to_id(relocation.symbol.section_name),
             relocation.size,
             relocation.offset,
             relocation.relative,

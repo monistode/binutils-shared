@@ -9,7 +9,6 @@ class RelocationTargetSymbol:
     """A symbol as declared in a section."""
 
     name: str
-    section_name: str
 
 
 @dataclass
