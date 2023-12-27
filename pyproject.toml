@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "monistode-binutils-shared"
-version = "0.1.17"
+version = "0.1.18"
 description = "A collection of tools shared among the monistode binutils."
 authors = ["rizerphe <44440399+rizerphe@users.noreply.github.com>"]
 readme = "README.md"

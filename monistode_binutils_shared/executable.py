@@ -238,6 +238,52 @@ class Executable(Protocol):
 
 
 @dataclass
+class RawExecutableFile:
+    """A folder with yaml files that represent an executable"""
+
+    text: bytearray | mmap.mmap
+
+    @classmethod
+    def from_file(cls, path: str) -> "RawExecutableFile":
+        """Return an executable from a folder."""
+        if os.path.exists(path):
+            file = open(path, "rb+")
+        else:
+            file = open(path, "wb+")
+            file.write(b"\0" * 1024)
+            file.flush()
+        return cls(mmap.mmap(file.fileno(), 0))
+
+    def clear(
+        self,
+        harvard: bool,
+        entry_point: int,
+    ) -> None:
+        """Clear the executable."""
+        assert not harvard
+        assert entry_point == 0
+        self.text[0 : len(self.text)] = bytes(len(self.text))
+
+    def append_segment(self, segment: PlacedBinary) -> None:
+        """Append a segment to the executable."""
+        if segment.flags.special:
+            return
+        if segment.data:
+            self.text_len_to_fit(segment.offset + segment.size)
+            self.text[segment.offset : segment.offset + segment.size] = bytes(
+                list(segment.data)
+            )
+
+    def text_len_to_fit(self, size: int) -> None:
+        """Extend the text segment to fit the given size."""
+        if size > len(self.text):
+            if isinstance(self.text, mmap.mmap):
+                self.text.resize(size)
+            else:
+                self.text.extend(bytes(size - len(self.text)))
+
+
+@dataclass
 class HarvardExecutableFilePair:
     """A folder with yaml files that represent an executable"""
 

@@ -5,6 +5,7 @@ from .executable import (
     ExecutableHeader,
     HarvardExecutableFilePair,
     PlacedBinary,
+    RawExecutableFile,
 )
 from .object_manager import ObjectManager, Parameters as ObjectParameters
 from .relocation import SymbolRelocation
@@ -26,4 +27,5 @@ __all__ = [
     "ExecutableHeader",
     "HarvardExecutableFilePair",
     "PlacedBinary",
+    "RawExecutableFile",
 ]
